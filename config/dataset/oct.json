@@ -1,0 +1,10 @@
+{
+  "name": "oct",
+  "path": "C:/Data/OCT/ISMR OCT Data - Downsampled",
+  "camera": {"fx": 1.0, "fy": 1.0, "u0": 0.0, "v0": 0.0},
+  "height": 157,
+  "width": 277,
+  "crop_size": 176,
+  "cube": [157, 165, 277],
+  "selected": [0, 1, 2, 3, 4, 5]
+}

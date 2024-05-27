@@ -10,10 +10,12 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
 from feeders.nyu_feeder import NyuFeeder
 from feeders.icvl_feeder import ICVLFeeder
+from feeders.oct_feeder import OCTFeeder
 from models.multiview_a2j import MultiviewA2J
 from ops.loss_ops import MultiA2JCalculator
 from ops.image_ops import normalize_image
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
+from utils.wandb_logger import SummaryWriter
 from tqdm import tqdm
 import numpy as np
 import random
@@ -109,8 +111,8 @@ class Processor(object):
                 self.global_step = self.checkpoint['global_step']
                 self.start_epoch = self.checkpoint['epoch']
                 self.min_error_3d = self.checkpoint['error']
-            self.train_writer = SummaryWriter(self.train_log_dir)
-            self.test_writer = SummaryWriter(self.test_log_dir)
+            self.train_writer = SummaryWriter(self.train_log_dir, 'train')
+            self.test_writer = SummaryWriter(self.test_log_dir, 'test')
 
         self.model_saved_name = os.path.join(self.args.model_saved_path, "model.pth")
 
@@ -128,6 +130,8 @@ class Processor(object):
                                       offset=self.args.offset, random_flip=False, adjust_cube=self.args.adjust_cube)
             elif self.args.dataset == 'icvl':
                 train_set = ICVLFeeder('train', max_jitter=self.args.max_jitter, depth_sigma=self.args.depth_sigma)
+            elif self.args.dataset == 'oct':
+                train_set = OCTFeeder('train')
             dataset['train'] = train_set
             lengths = [len(train_set)//self.args.split] * (self.args.split-1)
             lengths.append(len(train_set)-sum(lengths))
@@ -145,6 +149,8 @@ class Processor(object):
                                  adjust_cube=self.args.adjust_cube)
         elif self.args.dataset == 'icvl':
             test_set = ICVLFeeder('test', max_jitter=0., depth_sigma=0.)
+        elif self.args.dataset == 'oct':
+            test_set = OCTFeeder('test')
         dataset['test'] = test_set
         feeder['test'] = DataLoader(
             dataset=test_set,
